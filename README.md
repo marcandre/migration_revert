@@ -6,11 +6,11 @@ Some commands are not reversible, for example the removal of a table or a column
 
 Also, one downside is that it is now more difficult to write the reverse of a migration if `change` is used. When `up` and `down` were used, one could simply swap the code around.
 
-These commits introduce `Migration#revert` that makes it trivial to revert a past migration, in part or in whole, or do the doing a reversible removal of a table/column.
+This gem introduces `Migration#revert` that makes it trivial to revert a past migration, in part or in whole, or do the doing a reversible removal of a table/column.
 
 Note that `revert` can even be called from legacy migrations using `up` & `down` and that it can revert legacy-style migrations too. For anyone changing their mind every second day, `revert` is fully nestable.
 
-To have complete revertible capability, I would like to introduce a modified syntax for `change_column` that would allow it to be revertible; pull request upcoming when I get a chance...
+Sounds useful? Give a +1 to https://github.com/rails/rails/pull/7280
 
 ## Usage
 
@@ -20,8 +20,6 @@ the given migrations.
 The following migration will remove the table 'horses'
 and create the table 'apples' on the way up, and the reverse
 on the way down.
-
-This command can be nested.
 
     class FixTLMigration < ActiveRecord::Migration
       def change
@@ -37,7 +35,7 @@ This command can be nested.
       end
     end
 
-Or equivalently, if +TenderloveMigration+ is defined as in the
+Or equivalently, if `TenderloveMigration` is defined as in the
 documentation for Migration:
 
     class FixupTLMigration < ActiveRecord::Migration
@@ -50,6 +48,7 @@ documentation for Migration:
       end
     end
 
+This command can be nested.
 
 ## Installation
 

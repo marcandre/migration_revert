@@ -7,8 +7,6 @@ module ActiveRecord
     # and create the table 'apples' on the way up, and the reverse
     # on the way down.
     #
-    # This command can be nested.
-    #
     #   class FixTLMigration < ActiveRecord::Migration
     #     def change
     #       revert do
@@ -35,6 +33,8 @@ module ActiveRecord
     #       end
     #     end
     #   end
+    #
+    # This command can be nested.
     #
     def revert(*migration_classes)
       run(*migration_classes.reverse, :revert => true) unless migration_classes.empty?

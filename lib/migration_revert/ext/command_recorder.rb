@@ -1,6 +1,8 @@
 module ActiveRecord
   class Migration
     class CommandRecorder
+      attr_accessor :reverting
+
       def revert
         @reverting = !@reverting
         previous = @commands

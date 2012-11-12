@@ -18,13 +18,26 @@ module ActiveRecord
       #
       def record(*command, &block)
         if @reverting
-          @commands << inverse_of(*command)
+          @commands << inverse_of(*command, &block)
         else
           @commands << (command << block)
         end
       end
 
-      [:create_table, :create_join_table, :change_table, :rename_table, :add_column, :remove_column, :rename_index, :rename_column, :add_index, :remove_index, :add_timestamps, :remove_timestamps, :change_column, :change_column_default, :add_reference, :remove_reference].each do |method|
+      # Returns the inverse of the given command
+      #
+      #   recorder.inverse_of(:rename_table, [:old, :new])
+      #    # => [:rename_table, [:new, :old]]
+      #
+      # This method will raise an +IrreversibleMigration+ exception if it cannot
+      # invert the +commands+.
+      def inverse_of(command, args, &block)
+        method = :"invert_#{command}"
+        raise IrreversibleMigration unless respond_to?(method, true)
+        send(method, args, &block)
+      end
+
+      [:create_table, :create_join_table, :change_table, :rename_table, :add_column, :remove_column, :rename_index, :rename_column, :add_index, :remove_index, :add_timestamps, :remove_timestamps, :change_column, :change_column_default, :add_reference, :remove_reference, :transaction].each do |method|
         class_eval <<-EOV, __FILE__, __LINE__ + 1
           def #{method}(*args, &block)          # def create_table(*args, &block)
             record(:"#{method}", args, &block)  #   record(:create_table, args, &block)
@@ -34,18 +47,10 @@ module ActiveRecord
       alias :add_belongs_to :add_reference
       alias :remove_belongs_to :remove_reference
 
-      # Returns the inverse of the given command
-      #
-      #   recorder.inverse_of(:rename_table, [:old, :new])
-      #    # => [:rename_table, [:new, :old]]
-      #
-      # This method will raise an +IrreversibleMigration+ exception if it cannot
-      # invert the +commands+.
-      #
-      def inverse_of(name, args)
-        method = :"invert_#{name}"
-        raise IrreversibleMigration unless respond_to?(method, true)
-        send(method, args)
+      private
+
+      def invert_transaction(args, &block)
+        [:transaction, args, block]
       end
     end
   end
